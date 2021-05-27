@@ -1,0 +1,25 @@
+﻿import math
+import clr
+import System
+
+ms3 = Flowsheet.GetFlowsheetSimulationObject('MSTR-03')
+Q = ms3.GetVolumetricFlow()
+Visco = ms3.GetPhase('OverallLiquid').Properties.viscosity
+Flowsheet.WriteMessage("Volumetric flow: " + str(Q) + " m3/s")
+Flowsheet.WriteMessage("Viscosity: " + str(Visco) + " Pa.s")
+
+DiameterInch = 0.5
+Diameter = DiameterInch*2.54E-2
+Length = 1.0
+Kp = 159.0
+
+DeltaP = Kp*Visco*((4.0*Q)/(math.pi*Diameter**4.0))*Length
+Flowsheet.WriteMessage("Head Loss: " + str(DeltaP) + " Pa")
+
+InletPressure = ms3.GetProp("pressure", "Overall", None, "", "") 		# Pa
+OutletPressure = InletPressure - DeltaP
+
+IN = Flowsheet.GetFlowsheetSimulationObject('MSTR-03')
+OUT = Flowsheet.GetFlowsheetSimulationObject('MSTR-04')
+OUT.Assign(IN)
+OUT.SetProp("pressure", "Overall", None, "", "", P)			# Pa
